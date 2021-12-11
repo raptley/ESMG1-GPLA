@@ -230,10 +230,11 @@ def cierre():
 def runSimul():
     global sliderTiempo, graficadoCE, axCE, npasos_temporales, ruta, canvasCE, colorCEVariable
     global sliderTiempo2, graficadoDiagFase, axDiagFase, canvasDiagFase, colorDiagFaseVariableA, colorDiagFaseVariableB, listaColor
-    global axEnergias, canvasEnergias, colorEkVariable, colorEpVariable, colorEtVariable
+    global canvasEnergias, colorEkVariable, colorEpVariable, colorEtVariable
     global cadena1, cadena2, cadena3
     global graficadoEnergias
     global directorio_open, apertura
+    global ax1, ax2, ax3
     if btnSimular["text"] == "Simular...":
         exitns = False
         try:
@@ -471,8 +472,8 @@ def runSimul():
             ax = plt.Axes(fig, [0.175, 0.175, 0.8, 0.8])
             ax.set_ylim(EMin, EMax)
             ax.set_xlim(0, x[len(x)-1])
-            ax.set_xlabel("x (m)")
-            ax.set_ylabel("E (V/m)")
+            ax.set_xlabel("x")
+            ax.set_ylabel("E")
             fig.add_axes(ax)
             ax.grid()
             plt.savefig(ruta + "/CElec/Grid.png", transparent = True)
@@ -528,13 +529,13 @@ def runSimul():
         
         colorDiagFaseVariableA = StringVar(frameDiagFase)
         colorDiagFaseVariableA.trace("w", cambiocolorDiagFaseA)
-        colorDiagFaseVariableA.set(list(listaColor.keys())[2])
+        colorDiagFaseVariableA.set(list(listaColor.keys())[10])
         listaColorDiagFaseA = OptionMenu(frameDiagFase, colorDiagFaseVariableA, *list(listaColor.keys()))
         listaColorDiagFaseA.place(x=0, y=380)
 
         colorDiagFaseVariableB = StringVar(frameDiagFase)
         colorDiagFaseVariableB.trace("w", cambiocolorDiagFaseB)
-        colorDiagFaseVariableB.set(list(listaColor.keys())[0])
+        colorDiagFaseVariableB.set(list(listaColor.keys())[12])
         listaColorDiagFaseB = OptionMenu(frameDiagFase, colorDiagFaseVariableB, *list(listaColor.keys()))
         listaColorDiagFaseB.place(x=0, y=410)
         # Grid: DiagFase
@@ -558,8 +559,8 @@ def runSimul():
             ax = plt.Axes(fig, [0.175, 0.175, 0.8, 0.8])
             ax.set_ylim(vMin, vMax)
             ax.set_xlim(0, xMax)
-            ax.set_xlabel("x (m)")
-            ax.set_ylabel("v (m/s)")
+            ax.set_xlabel("x")
+            ax.set_ylabel("v")
             fig.add_axes(ax)
             ax.grid()
             plt.savefig(ruta + "/DiagFase/Grid.png", transparent = True)
@@ -666,12 +667,16 @@ def runSimul():
             Etfile.close()
 
         figEnergias = Figure(figsize=(5, 4), dpi = 110)
-        axEnergias = plt.Axes(figEnergias, [0.2, 0.15, 0.725, 0.775])
+        figEnergias.suptitle("Energías")
+        ax1 = figEnergias.add_axes([0.2, 0.675, 0.725, 0.2025], xticklabels=[])
+        ax1.xaxis.set_ticklabels([])
+        ax2 = figEnergias.add_axes([0.2, 0.425, 0.725, 0.2025], xticklabels=[])
+        ax2.xaxis.set_ticklabels([])
+        ax3 = figEnergias.add_axes([0.2, 0.175, 0.725, 0.2025], xticklabels=[])
         frameFigEnergias = Frame(pestanas, width = 800, height = 800)
         canvasEnergias = FigureCanvasTkAgg(figEnergias, master = frameFigEnergias)
         canvasEnergias.get_tk_widget().grid(row = 0, column = 0)
         pestanas.add(frameFigEnergias, text = "Energías")
-        figEnergias.add_axes(axEnergias)
 
         colorEtVariable = StringVar(frameFigEnergias)
         colorEtVariable.trace("w", cambiocolorEt)
@@ -702,14 +707,21 @@ def runSimul():
             Et = numpy.asarray(list(csv.reader(archivoEt, delimiter = ',')), dtype = "double")
 
         t = 0.1*numpy.linspace(0, npasos_temporales, npasos_temporales + 1)
-        axEnergias.cla()
-        axEnergias.plot(t, Ek[0][:], color = listaColor[colorEkVariable.get()], label = 'E. Cinetica', linewidth = 3)
-        axEnergias.plot(t, Ep[0][:], color = listaColor[colorEpVariable.get()], label = 'E. Potencial')
-        axEnergias.plot(t, Et[0][:], color = listaColor[colorEtVariable.get()], label = 'E. Total')
-        axEnergias.legend(loc = 4)
-        axEnergias.grid()
-        axEnergias.set_ylabel("Energía (J)")
-        axEnergias.set_xlabel("Tiempo (s)")
+        ax1.cla()
+        ax2.cla()
+        ax3.cla()
+        ax1.plot(t, Ek[0][:], color = listaColor[colorEkVariable.get()], label = 'E. Cinetica')
+        ax2.plot(t, Ep[0][:], color = listaColor[colorEpVariable.get()], label = 'E. Potencial')
+        ax3.plot(t, Et[0][:], color = listaColor[colorEtVariable.get()], label = 'E. Total')
+        ax1.grid()
+        ax2.grid()
+        ax3.grid()
+        ax1.xaxis.set_ticklabels([])
+        ax2.xaxis.set_ticklabels([])
+        ax1.set_ylabel("$E_{k}$")
+        ax2.set_ylabel("$E_{p}$")
+        ax3.set_ylabel("$E_{Total}$")
+        ax3.set_xlabel("$\omega t$")
         canvasEnergias.draw()
         graficadoEnergias = True
 
@@ -755,8 +767,8 @@ def runSimul():
         canvasRelDisp.get_tk_widget().grid(row = 0, column = 0)
         pestanas.add(frameFigRelDisp, text = "Rel. Dispersión")
         figRelDisp.add_axes(axRelDisp)
-        lim = numpy.max(numpy.max(Ewk))/8
-        limymax = 0
+        lim = 1*numpy.max(numpy.max(Ewk))/8
+        limymax= 0
         limymin = len(Ewk[0,:])
         limxmax = 0
         limxmin = limymin
@@ -774,8 +786,10 @@ def runSimul():
                 if numpy.max(numpy.where(rx)) > limxmax:
                     limxmax = numpy.max(numpy.where(rx))
         m = axRelDisp.contourf(K, W, Ewk, 8, alpha = .75, cmap = 'jet')
-        axRelDisp.set_xlim(k_simulada[limymin], k_simulada[limymax])
-        axRelDisp.set_ylim(omega_simulada[limxmin], omega_simulada[limxmax])
+        #axRelDisp.set_xlim(k_simulada[limymin], k_simulada[limymax])
+        axRelDisp.set_xlim(0, k_simulada[limymax])
+        #axRelDisp.set_ylim(omega_simulada[limxmin], omega_simulada[limxmax])
+        axRelDisp.set_ylim(0, omega_simulada[limxmax])
         figRelDisp.colorbar(m, ax = axRelDisp)
         axRelDisp.set_xlabel('k')
         axRelDisp.set_ylabel('$\omega$')
@@ -799,8 +813,8 @@ def runSimul():
             axCiclos.plot(x1[:, int(0.625*nparticulas)], y1[:, int(0.625*nparticulas)])
             axCiclos.grid()
             figCiclos.add_axes(axCiclos)
-            axCiclos.set_xlabel('x (m)')
-            axCiclos.set_ylabel('y (m)')
+            axCiclos.set_xlabel('x')
+            axCiclos.set_ylabel('y')
         
         labelBarra["text"] = "Finalizado."
         barra["mode"] = "determinate"
@@ -866,24 +880,32 @@ def cambiocolorEt(*args):
     actualizar2()
 
 def actualizar2():
-    global axEnergias, canvasEnergias, cadena1, cadena2, cadena3
+    global ax1, ax2, ax3, canvasEnergias, cadena1, cadena2, cadena3
     global listaColor, npasos_temporales, graficadoEnergias
+    global colorEkVariable, colorEpVariable, colorEtVariable
     if graficadoEnergias:
         t = 0.1*numpy.linspace(0, npasos_temporales, npasos_temporales + 1)
-        axEnergias.cla()
         with open(ruta + '/Energias/Ek.csv') as archivoEk, \
                 open(ruta + '/Energias/Ep.csv') as archivoEp, \
                 open(ruta + '/Energias/Et.csv') as archivoEt:
             Ek = numpy.asarray(list(csv.reader(archivoEk, delimiter = ',')), dtype = "double")
             Ep = numpy.asarray(list(csv.reader(archivoEp, delimiter = ',')), dtype = "double")
             Et = numpy.asarray(list(csv.reader(archivoEt, delimiter = ',')), dtype = "double")
-        axEnergias.plot(t, Ek[0][:], color = listaColor[cadena1], label = 'E. Cinetica', linewidth = 3)
-        axEnergias.plot(t, Ep[0][:], color = listaColor[cadena2], label = 'E. Potencial')
-        axEnergias.plot(t, Et[0][:], color = listaColor[cadena3], label = 'E. Total')
-        axEnergias.set_ylabel("Energía (J)")
-        axEnergias.set_xlabel("Tiempo (s)")
-        axEnergias.grid()
-        axEnergias.legend(loc = 4)
+        ax1.cla()
+        ax2.cla()
+        ax3.cla()
+        ax1.plot(t, Ek[0][:], color = listaColor[cadena1], label = 'E. Cinetica')
+        ax2.plot(t, Ep[0][:], color = listaColor[cadena2], label = 'E. Potencial')
+        ax3.plot(t, Et[0][:], color = listaColor[cadena3], label = 'E. Total')
+        ax1.grid()
+        ax2.grid()
+        ax3.grid()
+        ax1.xaxis.set_ticklabels([])
+        ax2.xaxis.set_ticklabels([])
+        ax1.set_ylabel("$E_{k}$")
+        ax2.set_ylabel("$E_{p}$")
+        ax3.set_ylabel("$E_{Total}$")
+        ax3.set_xlabel("$\omega t$")
         canvasEnergias.draw()
 
 def CargarEjemplo1():
@@ -1269,3 +1291,6 @@ barra.grid(row = 2, column = 0)
 root.protocol("WM_DELETE_WINDOW", cierre)
 root.resizable(False, False)
 root.mainloop()
+# Dark and Bright Soliton Simulation
+# Apéndices para las partes computacionales
+# Pasos básicos: Explicación física :)
